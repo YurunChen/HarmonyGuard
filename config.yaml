@@ -1,0 +1,79 @@
+# OpenAI Client Configuration
+openai:
+  # Policy Agent Configuration
+  policy_agent:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "${OPENAI_API_BASE}"
+    timeout: 30.0
+    model: "gpt-4o"
+    max_tokens: 2048
+    temperature: 0
+  
+  # Utility Agent Configuration  
+  utility_agent:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "${OPENAI_API_BASE}"
+    timeout: 30.0
+    model: "gpt-4o"
+    max_tokens: 2048
+    temperature: 0
+  
+  # WASP Benchmark Configuration
+  wasp:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "${OPENAI_API_BASE}"
+    timeout: 30.0
+    model: "gpt-4o"
+    max_tokens: 2048
+    temperature: 0
+  
+  # ST-WebAgentBench Configuration
+  st_webagentbench:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "${OPENAI_API_BASE}"
+    timeout: 30.0
+    model: "gpt-4o"
+    max_tokens: 2048
+    temperature: 0
+
+# MCP Server Configuration
+mcp_server:
+  openai:
+    api_key: "${OPENAI_API_KEY}"
+    base_url: "${OPENAI_API_BASE}"
+    model: "gpt-4o"
+    max_tokens: 20000
+    temperature: 0
+  http_timeout: 15.0
+  client_session_timeout: 60.0
+
+# Policy Database Configuration
+policy:
+  risk_cat_path: "put your processed policy file path here"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  console:
+    enabled: true
+    level: "INFO"
+    format: "%(asctime)s - %(levelname)s - %(message)s"
+  file:
+    enabled: false
+    level: "DEBUG"
+    format: "%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
+    path: "logs"
+    max_size: "10MB"
+    backup_count: 5
+  logger_configs:
+    harmony_agents:
+      level: "INFO"
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    benchmark:
+      level: "INFO"
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    utility:
+      level: "INFO"
+      format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s" 
