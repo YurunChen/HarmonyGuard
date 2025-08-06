@@ -125,7 +125,7 @@ HarmonyGuard/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/HarmonyGuard.git
+git clone git@github.com:YurunChen/HarmonyGuard.git
 cd HarmonyGuard
 ```
 
