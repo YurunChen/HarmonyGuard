@@ -195,7 +195,7 @@ Based on the following tutorial for deployment on AWS EC2:
 
 - **WASP**: [visualwebarena](https://github.com/facebookresearch/wasp/blob/main/visualwebarena/environment_docker/README.md)
 
-> **⚠️ Notice**: If the ST-WebAgentBench website runs successfully, several website URLs need to be configured in `\benchmark\ST-WebAgentBench\.env`.
+> **⚠️ Notice**: If the ST-WebAgentBench website runs successfully, several website URLs need to be configured in `HarmonyGuard/benchmark/ST-WebAgentBench/.env`.
 
 ---
 
