@@ -10,7 +10,7 @@ import asyncio
 import re
 import logging
 from datetime import datetime
-from dotenv import load_dotenv
+
 from openai import AsyncOpenAI
 import requests
 from bs4 import BeautifulSoup
@@ -28,8 +28,6 @@ from agents.mcp import MCPServerStdio
 from utility.config_loader import get_default_loader
 from utility.logger import get_logger
 
-# Load environment variables
-load_dotenv()
 
 logger = get_logger('policy_agent')
 
@@ -125,6 +123,20 @@ class PolicyAgent_Parse:
                 }
             },
             {
+                "name": "extract_text_from_html",
+                "description": "Extract text content from an HTML file",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "html_path": {"type": "string", "description": "Path to HTML file"},
+                        "output_txt_path": {"type": "string", "description": "Output path for extracted text"},
+                        "organization": {"type": "string", "description": "Organization name"},
+                        "process_dir": {"type": "string", "description": "Path to processing directory"}
+                    },
+                    "required": ["html_path"]
+                }
+            },
+            {
                 "name": "extract_policies_from_file",
                 "description": "Extract policy provisions from a TXT file",
                 "parameters": {
@@ -190,11 +202,11 @@ class PolicyAgent_Parse:
         
         system_prompt += (
             "\n\nWorkflow Sequence: "
-            "1. If input is PDF or webpage, extract text first → "
+            "1. If input is PDF, HTML, or webpage, extract text first → "
             "2. Extract policies from text → "
             "3. Review final results and remove duplicates\n\n"
             "Follow these instructions carefully:\n"
-            "1. Assess input type before starting (PDF, URL, or TXT)\n"
+            "1. Assess input type before starting (PDF, HTML, URL, or TXT)\n"
             "2. Call ONE tool per step and wait for results\n"
             "3. Only call review_results when all previous steps are complete\n"
             "4. Always use the tool call format to invoke tools\n"
@@ -317,6 +329,14 @@ class PolicyAgent_Parse:
                     "organization": self.context["organization"],
                     "process_dir": parameters.get("process_dir", "")
                 }
+            elif tool_name == "extract_text_from_html":
+                full_params = {
+                    "html_path": parameters.get("html_path"),
+                    "output_txt_path": parameters.get("output_txt_path"),
+                    "organization": self.context["organization"],
+                    "process_dir": parameters.get("process_dir", self.context["process_dir"])
+                }
+                
             elif tool_name == "extract_policies_from_file":
                 full_params = {
                     "organization": self.context["organization"],
@@ -569,7 +589,7 @@ class PolicyAgent_Parse:
                         current_state["error"] = tool_result.get("message")
                         continue
                     
-                    if tool_name in ["extract_text_from_pdf", "extract_text_from_webpage"]:
+                    if tool_name in ["extract_text_from_pdf", "extract_text_from_html", "extract_text_from_webpage"]:
                         files["txt_path"] = tool_result.get("txt_path")
                         current_state.update({
                             "text_extracted": True,
@@ -639,13 +659,13 @@ class PolicyAgent_Parse:
     
     def determine_input_type(self, input_path: str) -> str:
         """
-        Determine the type of input (PDF, URL, or TXT)
+        Determine the type of input (PDF, HTML, URL, or TXT)
         
         Args:
             input_path: Input path or URL
             
         Returns:
-            Input type: 'pdf', 'url', or 'txt'
+            Input type: 'pdf', 'html', 'url', or 'txt'
         """
         # Check if it's a URL
         if input_path.startswith("http://") or input_path.startswith("https://"):
@@ -655,6 +675,8 @@ class PolicyAgent_Parse:
         input_lower = input_path.lower()
         if input_lower.endswith(".pdf"):
             return "pdf"
+        elif input_lower.endswith(".html") or input_lower.endswith(".htm"):
+            return "html"
         elif input_lower.endswith(".txt"):
             return "txt"
         
@@ -815,7 +837,7 @@ async def main():
         name="Policy Processing MCP",
         params={
             "command": "python",
-            "args": ["-m", "mcp_server"],
+            "args": [os.path.join(os.path.dirname(__file__), "mcp_server.py")],
             "env": env_vars,
         },
         cache_tools_list=True,

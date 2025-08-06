@@ -7,7 +7,7 @@
 ### Toward Safety and Utility in Web Agents via Adaptive Policy Enhancement and Dual-Objective Optimization
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3120/)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-black.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/your-username/HarmonyGuard)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-black.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/YurunChen/HarmonyGuard)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=black)](LICENSE)
 
 *A multi-agent collaborative framework for balancing safety and utility in web environments*
@@ -131,18 +131,25 @@ cd HarmonyGuard
 
 ### 2️⃣ Set Up Environment Variables
 
-Create a `.env` file in the project root:
+Then edit the `env.example` file with your actual API keys:
 
 ```bash
 # OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key
-OPENAI_API_BASE=https://api.openai.com/v1
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_BASE=your_openai_base_url_here
 
-# Anthropic Configuration (for MCP Server)
-ANTHROPIC_API_KEY=your_anthropic_api_key
+# Anthropic Configuration
+ANTHROPIC_API_KEY=your_anthropic_api_key_here
+ANTHROPIC_API_BASE=your_anthropic_base_url_here
 
-# Alibaba DashScope Configuration (for Utility Agent)
-DASHSCOPE_API_KEY=your_dashscope_api_key
+# Alibaba DashScope Configuration
+DASHSCOPE_API_KEY=your_dashscope_api_key_here
+DASHSCOPE_API_BASE=your_dashscope_base_url_here
+```
+Copy the example environment file and configure it:
+
+```bash
+cp env.example .env
 ```
 
 ### 3️⃣ Install Dependencies
@@ -196,13 +203,15 @@ openai:
 ### 🔌 MCP Server Configuration
 ```yaml
 mcp_server:
-  anthropic:
+  openai:
     api_key: "${OPENAI_API_KEY}" # read from .env
-     base_url: "${OPENAI_API_BASE}" # read from .env
+    base_url: "${OPENAI_API_BASE}" # read from .env
     model: "gpt-4o"
-    max_tokens: 20000
+    max_tokens: 8000
     temperature: 0
 ```
+
+**Configuration**: The MCP Server uses OpenAI client for policy extraction. Set `OPENAI_API_BASE=https://api.openai-proxy.org/v1` in your `.env` file.
 
 ### 📝 Logging Configuration
 ```yaml
@@ -225,7 +234,7 @@ To process the policy files located in the root directory, execute the following
 ```bash
 cd harmony_agents
 python policy_agent.py \
-  -i /Users/yurunchen/project/python/HarmonyGuard_v2/policy_docs/wasp_risk.pdf \
+  -i your_policy_file_path \
   -org "organization" \
   -desc "Description of the policy files" \
   -subject "Agent"
@@ -281,9 +290,6 @@ python run.py \
 | **ST-WebAgentBench** | For the safety and trustworthiness evaluation framework |
 | **WASP** | For the web agent security benchmark |
 | **BrowserGym** | For the web automation infrastructure |
-| **OpenAI** | For GPT model APIs |
-| **Anthropic** | For Claude model APIs |
-| **Alibaba** | For Qwen model APIs |
 
 </div>
 

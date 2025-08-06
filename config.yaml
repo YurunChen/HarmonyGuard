@@ -42,7 +42,7 @@ mcp_server:
     api_key: "${OPENAI_API_KEY}"
     base_url: "${OPENAI_API_BASE}"
     model: "gpt-4o"
-    max_tokens: 20000
+    max_tokens: 8000
     temperature: 0
   http_timeout: 15.0
   client_session_timeout: 60.0

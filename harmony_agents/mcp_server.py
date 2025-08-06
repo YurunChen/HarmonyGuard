@@ -16,6 +16,8 @@ import queue
 import threading
 from collections import deque
 
+
+
 # For PDF processing
 import requests
 from bs4 import BeautifulSoup
@@ -25,7 +27,6 @@ from datetime import datetime
 
 from fastmcp import FastMCP
 from openai import OpenAI
-from anthropic import Anthropic
 
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -46,10 +47,21 @@ tool_mcp = FastMCP("Policy Extraction Server")
 config_loader = get_default_loader()
 try:
     mcp_config = config_loader.get_config()['mcp_server']
-    openai_config = mcp_config['openai']
+    model_config = mcp_config['openai']
+    logger.info("Using OpenAI configuration")
 except KeyError as e:
     logger.error("Missing MCP server configuration in config.yaml")
     raise ValueError(f"Missing MCP server configuration: {e}")
+
+# Initialize OpenAI client globally
+try:
+    openai_client = OpenAI(
+        api_key=model_config['api_key'],
+        base_url=model_config['base_url']
+    )
+except KeyError as e:
+    logger.error(f"Missing model configuration field: {e}")
+    raise ValueError(f"Missing model configuration field: {e}")
 
 # Add a global variable to store the pending document sections
 # Using a thread-safe queue to store the sections
@@ -116,79 +128,46 @@ def extract_text_from_pdf(
 
 
 @tool_mcp.tool()
-def extract_text_from_html(url: str, output_dir: Optional[str] = None, include_links: bool = True, allow_redirects: bool = True) -> Dict[str, Any]:
+def extract_text_from_html(html_path: str, output_txt_path: Optional[str] = None, organization: Optional[str] = None, process_dir: Optional[str] = None) -> Dict[str, Any]:
     """
-    Extract text content from an HTML page and save to a file.
+    Extract text content from an HTML file.
     
     Args:
-        url: URL of the HTML page
-        output_dir: Directory to save the extracted text file
-        include_links: Whether to include links in the output
-        allow_redirects: Whether to follow URL redirects
+        html_path: Path to the HTML file
+        output_txt_path: Path to save the extracted text. If not provided, it will be generated using organization and process_dir.
+        organization: Name of the organization, used to generate default output path.
+        process_dir: Directory to save the output file if output_txt_path is not provided.
         
     Returns:
         Dict: Information about the extraction including the file path where text was saved
     """
     try:
-        # Create a descriptive filename based on the URL
-        from urllib.parse import urlparse
-        parsed_url = urlparse(url)
-        domain = parsed_url.netloc.replace(".", "_")
-        path = parsed_url.path.replace("/", "_").strip("_")
-        if not path:
-            path = "home"
+        # Set default output path if not provided
+        if not output_txt_path:
+            if not organization or not process_dir:
+                raise ValueError("Either output_txt_path or both organization and process_dir must be provided.")
+            output_txt_path = os.path.join(
+                process_dir,
+                f"{organization}_extracted_text.txt"
+            )
         
-        # Create output directory if it doesn't exist
-        if not output_dir:
-            output_dir = os.getcwd()
-        os.makedirs(output_dir, exist_ok=True)
+        # Check if HTML file exists
+        if not os.path.exists(html_path):
+            raise FileNotFoundError(f"HTML file not found: {html_path}")
         
-        # Create output file path
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_file = os.path.join(output_dir, f"{domain}_{path}_{timestamp}.txt")
+        # Read HTML file
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
         
-        # Make request with redirect handling
-        if 'http_timeout' not in mcp_config:
-            logger.error("Missing http_timeout in MCP server configuration")
-            raise ValueError("Missing http_timeout in MCP server configuration")
-        
-        http_timeout = mcp_config['http_timeout']
-        response = requests.get(url, timeout=http_timeout, allow_redirects=allow_redirects)
-        
-        # Check if we were redirected to a different URL
-        final_url = response.url
-        was_redirected = (final_url != url)
-        
-        # If the request failed with a 403 Forbidden and redirects weren't allowed, try again with redirects
-        if response.status_code == 403 and not allow_redirects:
-            logger.info(f"Got 403 Forbidden. Retrying with redirects enabled.")
-            response = requests.get(url, timeout=http_timeout, allow_redirects=True)
-            final_url = response.url
-            was_redirected = (final_url != url)
-        
-        # Raise an exception if the response status code indicates an error
-        response.raise_for_status()
-        
-        # If we were redirected, update the output filename to reflect the final URL
-        if was_redirected:
-            logger.info(f"URL was redirected: {url} -> {final_url}")
-            parsed_final_url = urlparse(final_url)
-            final_domain = parsed_final_url.netloc.replace(".", "_")
-            final_path = parsed_final_url.path.replace("/", "_").strip("_")
-            if not final_path:
-                final_path = "home"
-            
-            # Update output file path with final URL info
-            output_file = os.path.join(output_dir, f"{final_domain}_{final_path}_{timestamp}.txt")
-        
-        soup = BeautifulSoup(response.text, 'html.parser')
+        # Parse HTML and extract text
+        soup = BeautifulSoup(html_content, 'html.parser')
         
         # Get the page title
         title = soup.title.string if soup.title else "No title"
         
-        # Remove script and style elements
-        for script in soup(["script", "style"]):
-            script.extract()
+        # Remove unwanted elements
+        for element in soup(['script', 'style', 'header', 'footer', 'nav', 'aside']):
+            element.decompose()
         
         # Extract headings to understand document structure
         headings = []
@@ -196,14 +175,14 @@ def extract_text_from_html(url: str, output_dir: Optional[str] = None, include_l
             for heading in soup.find_all(f'h{i}'):
                 headings.append(f"h{i}: {heading.get_text(strip=True)}")
         
-        # Get text
+        # Get text and clean up
         text = soup.get_text(separator='\n')
+        text = re.sub(r'\n\s*\n', '\n\n', text)  # Remove excessive newlines
+        text = text.strip()
         
         # Format the output
         output = f"--- {title} ---\n\n"
-        output += f"Original URL: {url}\n"
-        if was_redirected:
-            output += f"Redirected URL: {final_url}\n"
+        output += f"Source File: {html_path}\n"
         output += "\n"
         
         if headings:
@@ -214,42 +193,11 @@ def extract_text_from_html(url: str, output_dir: Optional[str] = None, include_l
         output += "--- CONTENT ---\n"
         output += text
         
-        all_links = []
-        # Extract links for potential deep policy exploration
-        if include_links:
-            links = []
-            for a_tag in soup.find_all('a', href=True):
-                link = a_tag['href']
-                link_text = a_tag.get_text(strip=True)
-                
-                # Handle relative URLs - use the final URL as base if redirected
-                base_url = urlparse(final_url if was_redirected else url)
-                if not link.startswith(('http://', 'https://')):
-                    if link.startswith('/'):
-                        link = f"{base_url.scheme}://{base_url.netloc}{link}"
-                    else:
-                        link = urljoin(final_url if was_redirected else url, link)
-                
-                links.append({
-                    'url': link,
-                    'text': link_text
-                })
-                all_links.append({
-                    'url': link,
-                    'text': link_text
-                })
-            
-            # Add links section to the text
-            if links:
-                output += "\n\n--- PAGE LINKS ---\n"
-                for i, link in enumerate(links):
-                    output += f"Link {i+1}: {link['text']} -> {link['url']}\n"
-        
         # Write the extracted text to the output file
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_txt_path, 'w', encoding='utf-8') as f:
             f.write(output)
             
-        logger.info(f"Saved extracted HTML text to {output_file}")
+        logger.info(f"Saved extracted HTML text to {output_txt_path}")
         
         # Get a preview of the content (first 1000 chars)
         preview_count = 1000
@@ -258,24 +206,20 @@ def extract_text_from_html(url: str, output_dir: Optional[str] = None, include_l
         # Return structured data with file path directly accessible
         result = {
             "success": True,
-            "file_path": output_file,
-            "source": url,
-            "final_url": final_url if was_redirected else url,
-            "was_redirected": was_redirected,
+            "file_path": output_txt_path,
+            "txt_path": output_txt_path,
+            "source": html_path,
             "title": title,
             "headings_count": len(headings),
-            "links_count": len(links) if include_links and 'links' in locals() else 0,
             "preview": preview,
             "message": f"""HTML TEXT EXTRACTION COMPLETE:
-- Source: {url}
-{f'- Redirected to: {final_url}' if was_redirected else ''}
+- Source: {html_path}
 - Title: {title}
 - Number of headings: {len(headings)}
-- Number of links: {len(links) if include_links and 'links' in locals() else 0}
-- Full page content saved to: {output_file}
+- Full page content saved to: {output_txt_path}
 - Page content preview: {preview}
 
-If needed, USE THIS FILE PATH to extract policies: {output_file}"""
+If needed, USE THIS FILE PATH to extract policies: {output_txt_path}"""
         }
         
         return result
@@ -283,18 +227,6 @@ If needed, USE THIS FILE PATH to extract policies: {output_file}"""
     except Exception as e:
         error_msg = f"Error extracting text from HTML: {str(e)}"
         logger.error(error_msg)
-        
-        # If we got a connection error or HTTP error, try one more time with different redirect settings
-        if isinstance(e, (requests.HTTPError, requests.ConnectionError)) and not allow_redirects:
-            logger.info(f"Retrying with redirects enabled after error: {str(e)}")
-            try:
-                # Try again with redirects enabled
-                return extract_text_from_html(url, output_dir, include_links, allow_redirects=True)
-            except Exception as retry_e:
-                # If retry also fails, report both errors
-                error_msg = f"Error extracting text from HTML (both with and without redirects): {str(e)} and then {str(retry_e)}"
-                logger.error(error_msg)
-                
         return {"success": False, "error": error_msg}
 
 @tool_mcp.tool()
@@ -376,10 +308,10 @@ Provide the output in the following JSON format:
             response = chat_text(
                 prompt=user_prompt, 
                 system=system_prompt, 
-                model=openai_config['model'],
+                model=model_config['model'],
                 client=openai_client,
-                max_tokens=openai_config['max_tokens'], 
-                temperature=openai_config['temperature'],
+                max_tokens=model_config['max_tokens'], 
+                temperature=model_config['temperature'],
                 )
 
             # with open(f"response_{file_info}.txt", "w", encoding="utf-8") as f:
@@ -649,14 +581,4 @@ def review_results(process_dir: str, organization: str) -> dict:
 
 
 if __name__ == "__main__":
-    # Initialize OpenAI client with configuration from config.yaml
-    try:
-        openai_client = OpenAI(
-            api_key=openai_config['api_key'],
-            base_url=openai_config['base_url']
-        )
-    except KeyError as e:
-        logger.error(f"Missing OpenAI configuration field: {e}")
-        raise ValueError(f"Missing OpenAI configuration field: {e}")
-
     tool_mcp.run()

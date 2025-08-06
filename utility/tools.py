@@ -83,29 +83,20 @@ def encode_image(image_path):
     return base64_image, mime_type
 
 
-def chat_text(prompt, system=None, model="claude-3-7-sonnet-20250219", client=None, max_tokens=10000, temperature=0.2):
-    if "claude" in model:
-        response = client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            system=system,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        result_text = response.content[0].text
-    elif "openai" in model:
-        response = client.chat.completions.create(
-            model=model,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            system=system,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        result_text = response.choices[0].message.content
-    else:
-        raise ValueError(f"Model {model} not supported")
+def chat_text(prompt, system=None, model="gpt-4o", client=None, max_tokens=10000, temperature=0.2):
+    # For OpenAI, system message should be included in messages array
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
     
-    # Parse response
+    response = client.chat.completions.create(
+        model=model,
+        max_tokens=max_tokens,
+        temperature=temperature,
+        messages=messages
+    )
+    result_text = response.choices[0].message.content
     
     return result_text
 

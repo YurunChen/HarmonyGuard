@@ -4,8 +4,8 @@ import os
 import re
 from openai import OpenAI 
 from .policy_agent import PolicyAgent_Update
-from utility.config_loader import get_default_loader, get_config_loader
-from utility.tools import read_security_policy_categories, _format_policy_list, pretty_print_alignment, get_project_root
+from utility.config_loader import get_default_loader
+from utility.tools import read_security_policy_categories, _format_policy_list, chat_text
 from utility.logger import get_logger
 
 class UtilityAgent:
@@ -46,24 +46,22 @@ class UtilityAgent:
         model = model or openai_config['model']
         temperature = temperature if temperature is not None else openai_config['temperature']
         max_tokens = max_tokens or openai_config['max_tokens']
-        timeout = timeout or openai_config['timeout']
-        api_key = openai_config['api_key']
-        base_url = openai_config['base_url']
         
+        # Create OpenAI client
         client = OpenAI(
-            api_key=api_key,
-            base_url=base_url,
-            timeout=timeout
+            api_key=openai_config['api_key'],
+            base_url=openai_config['base_url'],
+            timeout=timeout or openai_config['timeout']
         )
         
         try:
-            response = client.chat.completions.create(
+            content = chat_text(
+                prompt=text_prompt,
                 model=model,
-                temperature=temperature,
+                client=client,
                 max_tokens=max_tokens,
-                messages=[{"role": "user", "content": text_prompt}]
+                temperature=temperature
             )
-            content = response.choices[0].message.content
             return content.strip() if content else ""
         except Exception as e:
             self.logger.warning(f"API request failed: {e}")
