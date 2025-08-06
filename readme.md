@@ -34,17 +34,20 @@
     - [1️⃣ Clone the Repository](#1️⃣-clone-the-repository)
     - [2️⃣ Set Up Environment Variables](#2️⃣-set-up-environment-variables)
     - [3️⃣ Install Dependencies](#3️⃣-install-dependencies)
-      - [🏆 For ST-WebAgentBench:](#-for-st-webagentbench)
-      - [🐝 For WASP:](#-for-wasp)
+      - [🏆 For ST-WebAgentBench](#-for-st-webagentbench)
+      - [🐝 For WASP](#-for-wasp)
     - [4️⃣ Website Deployment](#4️⃣-website-deployment)
   - [🔧 Configuration](#-configuration)
     - [🤖 Agent Configuration](#-agent-configuration)
     - [🔌 MCP Server Configuration](#-mcp-server-configuration)
     - [📝 Logging Configuration](#-logging-configuration)
   - [📊 Policy Processing](#-policy-processing)
-  - [🧪 Evaluation](#-evaluation)
+  - [🐝 Running](#-running)
     - [ST-WebAgentBench](#st-webagentbench)
     - [WASP](#wasp)
+    - [Result Saved](#result-saved)
+    - [Notice](#notice)
+  - [🧪 Evaluation](#-evaluation)
   - [🙏 Acknowledgments](#-acknowledgments)
   - [📞 Communication and Cooperation](#-communication-and-cooperation)
   - [📄 License](#-license)
@@ -109,7 +112,19 @@ HarmonyGuard/
 │   └── tools.py           # Common tools
 ├── 📚 policy_docs/           # External Policy documentation
 ├── 📊 policy_processing_output/ # Structured policy outputs
-└── 📈 output/               # Evaluation results
+├── 📈 output/               # Evaluation results
+│   ├── stweb/             # ST-WebAgentBench results
+│   └── wasp/              # WASP results
+├── 📊 evaluate/              # Evaluation tools
+│   ├── evaluate_wasp.py   # WASP evaluation tool
+│   ├── evaluate_stweb.py  # ST-Web evaluation tool
+│   ├── Results/           # Evaluation results directory
+│   │   ├── WASP/         # WASP results to be evluated
+│   │   └── stweb/        # ST-Web results to be evluated
+│   └── README.md         # Evaluation documentation
+└── 📝 materials/            # Project materials
+    ├── icon.png          # Project icon
+    └── config_explanation_en.md # Configuration documentation
 ```
 
 ---
@@ -154,16 +169,16 @@ cp env.example .env
 
 ### 3️⃣ Install Dependencies
 
-We tested the performance of **HarmonyGuard** on two benchmarks, and the environment configuration of the benchmarks is as follows.
+We evaluated the performance of HarmonyGuard on two benchmarks. The benchmark environments were set up using two scripts, with each environment created via conda.
 
-#### 🏆 For ST-WebAgentBench:
+#### 🏆 For ST-WebAgentBench
 ```bash
 chmod +x setup_stweb.sh
 ./setup_stweb.sh
 ```
 This will create an environment named `harmonyguard-stweb` using conda.
 
-#### 🐝 For WASP:
+#### 🐝 For WASP
 ```bash
 chmod +x setup_wasp.sh
 ./setup_stweb.sh
@@ -211,7 +226,7 @@ mcp_server:
     temperature: 0
 ```
 
-**Configuration**: The MCP Server uses OpenAI client for policy extraction. Set `OPENAI_API_BASE=https://api.openai-proxy.org/v1` in your `.env` file.
+
 
 ### 📝 Logging Configuration
 ```yaml
@@ -248,7 +263,7 @@ policy:
 ```
 ---
 
-## 🧪 Evaluation
+## 🐝 Running
 
 ### ST-WebAgentBench
 
@@ -278,8 +293,20 @@ python run.py \
     --output-dir ../../../output/wasp/ \
     --output-format webarena
 ```
+### Result Saved
+
+We recommend saving all output files in the `HarmonyGuard/output` directory.
+The results of WASP should be stored in `HarmonyGuard/output/wasp`, and the results of ST-WebAgentBench should be stored in `HarmonyGuard/output/stweb`.
+
+### Notice
+The results of WASP is printed to the console. Please make sure to save the complete execution log.
+
+
 
 ---
+
+## 🧪 Evaluation
+We provide the evaluation code in the `evaluate` folder. Detailed instructions can be found [here](evaluate/README.md).
 
 ## 🙏 Acknowledgments
 

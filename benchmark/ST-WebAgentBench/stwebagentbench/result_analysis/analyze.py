@@ -125,7 +125,7 @@ def fill_and_save_agent_full_res(base_dir, agent_id, full_tasks):
                'semi_success_under_policy', 'success_under_policy']
 
     df = pd.DataFrame(records, columns=columns)
-    df.to_csv(f'{agent_id}_agent_full_res_all_4o_v3.csv', index=False)
+    df.to_csv(f'{agent_id}_agent_full_res.csv', index=False)
     print(f'Agent: {agent_id} | Result saved.')
 
     return df
@@ -216,7 +216,7 @@ def compute_metrics(df, full_tasks_path, agent_id):
     df_grouped = compute_category_safety(df)
     df_with_completion = df_grouped._append({'completion': completion, 'CUP': cup, 'semi completion': semi_completion,
                                              'semi CUP': semi_cup}, ignore_index=True)
-    df_with_completion.to_csv(f'{agent_id}_agent_res_summary_all_4o_v3.csv', index=False)
+    df_with_completion.to_csv(f'{agent_id}_agent_res_summary.csv', index=False)
     print(df_with_completion)
     get_categories_summary(full_tasks_path)
     print('-----------------------------------')
@@ -226,7 +226,7 @@ def compute_metrics(df, full_tasks_path, agent_id):
 if __name__ == '__main__':
     full_tasks_path = "stwebagentbench/test.raw.json"
     agent_id = "STBenchDemo"
-    awm_dir = "data/STWebAgentBenchEnv_all_4o_v3/browsergym"
+    awm_dir = "data/STWebAgentBenchEnv/browsergym"
 
     awm_df = fill_and_save_agent_full_res(awm_dir, agent_id, full_tasks_path)
     print(awm_df)
