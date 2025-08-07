@@ -27,6 +27,7 @@
   - [🎯 Overview](#-overview)
     - [🔧 Key Components](#-key-components)
     - [🎯 Core Capabilities](#-core-capabilities)
+    - [🌟 Citiation](#-citiation)
   - [🚀 Features](#-features)
   - [🏗️ Architecture](#️-architecture)
   - [⚙️ Installation](#️-installation)
@@ -49,7 +50,7 @@
     - [Notice](#notice)
   - [🧪 Evaluation](#-evaluation)
   - [🙏 Acknowledgments](#-acknowledgments)
-  - [📞 Communication and Cooperation](#-communication-and-cooperation)
+  - [📞 Contact](#-contact)
   - [📄 License](#-license)
 
 ---
@@ -75,6 +76,20 @@ To address this gap, we propose **HarmonyGuard**, a multi-agent collaborative fr
 2. **⚖️ Dual-Objective Optimization**: Based on the dual objectives of safety and utility, the Utility Agent integrated within **HarmonyGuard** performs the Markovian real-time reasoning to evaluate the objectives and utilizes metacognitive capabilities for their optimization.
 
 > **📊 Performance**: Extensive evaluations on multiple benchmarks show that **HarmonyGuard** improves policy compliance by up to **38%** and task completion by up to **20%** over existing baselines, while achieving over **90%** policy compliance across all tasks.
+
+### 🌟 Citiation
+If you find our work valuable for your research or applications, we would greatly appreciate a star ⭐ and a citation using the BibTeX entry provided below.
+```
+@misc{chen2025harmonyguardsafetyutilityweb,
+      title={HarmonyGuard: Toward Safety and Utility in Web Agents via Adaptive Policy Enhancement and Dual-Objective Optimization}, 
+      author={Yurun Chen and Xavier Hu and Yuhan Liu and Keting Yin and Juncheng Li and Zhuosheng Zhang and Shengyu Zhang},
+      year={2025},
+      eprint={2508.04010},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2508.04010}, 
+}
+```
 
 ---
 
@@ -322,12 +337,12 @@ We provide the evaluation code in the `evaluate` folder. Detailed instructions c
 
 ---
 
-## 📞 Communication and Cooperation
+## 📞 Contact
 
 For questions, issues, or contributions:
 
 - 📧 **Email**: yurunchen.research@gmail.com
-- 🐛 **Issues**: [GitHub Issues](https://github.com/your-username/HarmonyGuard/issues)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/YurunChen/HarmonyGuard/issues)
 
 ---
 
