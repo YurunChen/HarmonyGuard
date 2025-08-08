@@ -341,7 +341,7 @@ We provide the evaluation code in the `evaluate` folder. Detailed instructions c
 
 For questions, issues, or contributions:
 
-- 📧 **Email**: yurunchen.research@gmail.com
+- 📧 **Email**: [yurunchen.research@gmail.com](mailto:yurunchen.research@gmail.com)
 - 🐛 **Issues**: [GitHub Issues](https://github.com/YurunChen/HarmonyGuard/issues)
 
 ---
