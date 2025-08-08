@@ -12,7 +12,7 @@
 
 *A multi-agent collaborative framework for balancing safety and utility in web environments*
 
-📄 [Paper](https://arxiv.org/abs/2508.04010) | 🤗 [HuggingFace](https://huggingface.co/papers/2508.04010) | 🐦 [X (Twitter)](https://x.com/YRChen_AIsafety/status/1953713038588359133)
+📄 [Paper](https://arxiv.org/abs/2508.04010) | 🤗 [HuggingFace](https://huggingface.co/papers/2508.04010) | 🐦 [X (Twitter)](https://x.com/YRChen_AIsafety/status/1953745222258897305)
 
 
 </div>
