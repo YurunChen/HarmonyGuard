@@ -196,7 +196,7 @@ This will create an environment named `harmonyguard-stweb` using conda.
 #### 🐝 For WASP
 ```bash
 chmod +x setup_wasp.sh
-./setup_stweb.sh
+./setup_wasp.sh
 ```
 This will create an environment named `harmonyguard-wasp` using conda.
 
