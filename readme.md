@@ -80,14 +80,11 @@ To address this gap, we propose **HarmonyGuard**, a multi-agent collaborative fr
 ### 🌟 Citiation
 If you find our work valuable for your research or applications, we would greatly appreciate a star ⭐ and a citation using the BibTeX entry provided below.
 ```
-@misc{chen2025harmonyguardsafetyutilityweb,
-      title={HarmonyGuard: Toward Safety and Utility in Web Agents via Adaptive Policy Enhancement and Dual-Objective Optimization}, 
-      author={Yurun Chen and Xavier Hu and Yuhan Liu and Keting Yin and Juncheng Li and Zhuosheng Zhang and Shengyu Zhang},
-      year={2025},
-      eprint={2508.04010},
-      archivePrefix={arXiv},
-      primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2508.04010}, 
+@article{chen2025harmonyguard,
+  title={HarmonyGuard: Toward Safety and Utility in Web Agents via Adaptive Policy Enhancement and Dual-Objective Optimization},
+  author={Chen, Yurun and Hu, Xavier and Liu, Yuhan and Yin, Keting and Li, Juncheng and Zhang, Zhuosheng and Zhang, Shengyu},
+  journal={arXiv preprint arXiv:2508.04010},
+  year={2025}
 }
 ```
 
